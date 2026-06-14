@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<!-- saved from url=(0031)https://www.champagnenexus.com/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitty</title>
+
+    <!-- PWA / "Add to Home screen" support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a1628">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" type="image/png" sizes="192x192" href="Kitty_files/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="Kitty_files/icon-512.png">
+
+    <!-- iOS support (bonus, since Safari uses these instead of the manifest) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kitty">
+    <link rel="apple-touch-icon" href="Kitty_files/icon-192.png">
+
+    <link href="./Kitty_files/css2" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2840 50%, #0a1628 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 150, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 200, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Left Panel - Docker Containers */
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(90deg, rgba(0, 150, 255, 0.3), rgba(0, 200, 255, 0.2));
+            border: 2px solid rgba(0, 200, 255, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3), inset 0 0 20px rgba(0, 100, 200, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #00d4ff, #0088ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 200, 255, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .install-btn {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: rgba(0, 150, 255, 0.15);
+            border: 2px solid #00d4ff;
+            border-radius: 25px;
+            color: #00d4ff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .install-btn:hover {
+            background: rgba(0, 212, 255, 0.25);
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+        }
+
+        .install-btn.visible {
+            display: inline-flex;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 50, 100, 0.5);
+            border: 2px solid rgba(0, 150, 255, 0.4);
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-family: 'Rajdhani', sans-serif;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+            background: rgba(0, 50, 100, 0.7);
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .containers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .container-card {
+            background: linear-gradient(145deg, rgba(0, 50, 100, 0.6), rgba(0, 30, 80, 0.8));
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .container-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .container-card:hover {
+            transform: translateY(-5px);
+            border-color: #00d4ff;
+            box-shadow: 0 10px 40px rgba(0, 200, 255, 0.4), inset 0 0 20px rgba(0, 150, 255, 0.2);
+        }
+
+        .container-card:hover::before {
+            opacity: 1;
+        }
+
+        .container-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(0, 200, 255, 0.4);
+            background: rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .container-card:hover .container-icon {
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+            transform: scale(1.1);
+        }
+
+        .container-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .container-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            word-break: break-word;
+        }
+
+        /* Right Panel - Servers */
+        .right-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .servers-section {
+            background: linear-gradient(145deg, rgba(0, 50, 100, 0.5), rgba(0, 30, 80, 0.7));
+            border: 2px solid rgba(0, 150, 255, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .servers-section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid rgba(0, 200, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .server-card {
+            background: rgba(0, 40, 90, 0.6);
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .server-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.2), transparent);
+            transition: right 0.5s;
+        }
+
+        .server-card:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 5px 20px rgba(0, 200, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .server-card:hover::after {
+            right: 100%;
+        }
+
+        .server-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .server-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 200, 255, 0.4);
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        .server-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .server-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .server-url {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Current Time Section */
+        .time-section {
+            background: linear-gradient(145deg, rgba(0, 50, 100, 0.5), rgba(0, 30, 80, 0.7));
+            border: 2px solid rgba(0, 150, 255, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .time-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .time-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: #00d4ff;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            .right-panel {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .containers-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="header">
+                <h1>Kitty ;)</h1>
+                <button id="installBtn" class="install-btn">Install App</button>
+            </div>
+
+            <div class="search-bar">
+                <input type="search" id="searchInput" placeholder="Search containers...">
+            </div>
+
+            <div class="containers-grid" id="containersGrid"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="servers-section">
+                <h2>Servers</h2>
+                <div id="serversList"></div>
+            </div>
+
+            <div class="time-section">
+                <div class="time-label">Current Time</div>
+                <div class="time-display" id="currentTime">16:08:13</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── CONTAINERS ──────────────────────────────────────────────────────
+        // Add, remove, or edit entries here — the grid renders automatically.
+        const containers = [
+            { name: 'Guacamole',             url: 'https://guac.champagnenexus.com/',   icon: 'Kitty_files/ApacheGuacamole-icon.png' },
+            { name: 'delugevpn',             url: 'http://deluge.champagnenexus.com/',  icon: 'Kitty_files/binhex-delugevpn-icon.png' },
+            { name: 'plex',                  url: 'https://plex.champagnenexus.com/',   icon: 'Kitty_files/binhex-plex-icon.png' },
+            { name: 'code-server',           url: 'https://vscode.champagnenexus.com/', icon: 'Kitty_files/code-server-icon.png' },
+            { name: 'Nginx',                 url: 'https://nginx.champagnenexus.com/',   icon: 'Kitty_files/Nginx-Proxy-Manager-Official-icon.png' },
+            { name: 'ollama',                url: 'https://ollama.champagnenexus.com/',         icon: 'Kitty_files/ollama-icon.png' },
+            { name: 'open-webui',            url: 'https://open-webui.champagnenexus.com/',          icon: 'Kitty_files/open-webui-icon.png' },
+            { name: 'overseerr',             url: 'https://overseerr.champagnenexus.com/',          icon: 'Kitty_files/overseerr-icon.png' },
+            { name: 'prowlarr',              url: 'https://prowlarr.champagnenexus.com/', icon: 'Kitty_files/prowlarr-icon.png' },
+            { name: 'radarr',                url: 'http://radarr.champagnenexus.com/', icon: 'Kitty_files/radarr-icon.png' },
+            { name: 'sonarr',                url: 'https://sonarr.champagnenexus.com/', icon: 'Kitty_files/sonarr-icon.png' }
+        ];
+
+        // ── SERVERS ─────────────────────────────────────────────────────────
+        // Add, remove, or edit entries here — the panel renders automatically.
+        const servers = [
+            { name: 'Kitsara', url: 'https://kitty.champagnenexus.com/', icon: 'Kitty_files/unraid.jpg' },
+            { name: 'Tsarena', url: 'https://tsarena.champagnenexus.com/', icon: 'Kitty_files/proxmox.png' }
+        ];
+
+        // Render containers
+        function renderContainers(filter = '') {
+            const grid = document.getElementById('containersGrid');
+            grid.innerHTML = '';
+            
+            const filtered = containers.filter(c => 
+                c.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            filtered.forEach(container => {
+                const card = document.createElement('a');
+                card.className = 'container-card';
+                card.href = container.url;
+                card.target = '_blank';
+                card.innerHTML = `
+                    <div class="container-icon">
+                        <img src="${container.icon}" alt="${container.name}">
+                    </div>
+                    <div class="container-name">${container.name}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Render servers
+        function renderServers() {
+            const list = document.getElementById('serversList');
+            list.innerHTML = '';
+
+            servers.forEach(server => {
+                const card = document.createElement('a');
+                card.className = 'server-card';
+                card.href = server.url;
+                card.target = '_blank';
+                card.innerHTML = `
+                    <div class="server-header">
+                        <div class="server-icon">
+                            <img src="${server.icon}" alt="${server.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23003366%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2255%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%2300d4ff%22%3E${server.name.charAt(0)}%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        <div>
+                            <div class="server-name">
+                                <span class="status-indicator"></span>
+                                ${server.name}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="server-url">${server.url}</div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false 
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderContainers(e.target.value);
+        });
+
+        // Initialize
+        renderContainers();
+        renderServers();
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // ── PWA INSTALL (Add to Home Screen) ─────────────────────────────────
+        let deferredInstallPrompt = null;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the default mini-infobar and show our own button instead
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            installBtn.classList.add('visible');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            installBtn.classList.remove('visible');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.classList.remove('visible');
+            deferredInstallPrompt = null;
+        });
+
+        // ── SERVICE WORKER ─────────────────────────────────────────────────
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .catch((err) => console.warn('Service worker registration failed:', err));
+            });
+        }
+    </script>
+
+</body></html>
