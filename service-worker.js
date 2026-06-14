@@ -6,8 +6,8 @@ const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/Kitty_files/icon-192.png',
+  '/Kitty_files/icon-512.png'
 ];
 
 // Install: pre-cache the app shell
